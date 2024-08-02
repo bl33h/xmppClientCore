@@ -5,7 +5,6 @@
 # Creation: 01/08/2024
 # Last modification: 01/08/2024
 
-
 while True:
     print("\n--- Welcome to the XMPP Client Core Chat ---")
     print("[1.] Log in")

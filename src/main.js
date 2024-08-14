@@ -1,11 +1,12 @@
+require('dotenv').config();
 const { client, xml } = require('@xmpp/client');
 
 const xmpp = client({
-  service: 'ws://alumchat.lol:7070/ws/',
-  domain: 'alumchat.lol',
-  resource: 'example',
-  username: 'per21371',
-  password: 'per21371'
+  service: process.env.SERVICE_URL,
+  domain: process.env.DOMAIN,
+  resource: process.env.RESOURCE,
+  username: process.env.USERNAMES,
+  password: process.env.PASSWORD
 });
 
 xmpp.on('online', async (address) => {
@@ -25,6 +26,10 @@ xmpp.on('online', async (address) => {
   console.log('✔ message sent');
 
   xmpp.stop();
+});
+
+xmpp.on('error', (err) => {
+  console.error('!', 'connection error:', err);
 });
 
 xmpp.start().catch(console.error);

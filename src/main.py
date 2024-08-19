@@ -3,8 +3,8 @@
 # author: Sara Echeverria
 # version: I
 # creation: 01/08/2024
-# last modification: 18/08/2024
-# references: https://docs.python.org/3/library/asyncio.html
+# last modification: 19/08/2024
+# References: https://docs.python.org/3/library/asyncio.html, https://docs.python.org/3/library/logging.html, https://pypi.org/project/python-dotenv/
 
 import os
 import asyncio
@@ -20,42 +20,46 @@ logging.getLogger('slixmpp').setLevel(logging.ERROR)
 load_dotenv()
 
 # get the domain from the .env file
-domain = os.getenv('DOMAIN')
+DOMAIN = os.getenv('DOMAIN')
 
 def main():
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
     while True:
-        print("\n--- welcome to the xmpp client core chat ---")
-        print("[1.] log in")
-        print("[2.] sign up")
-        print("[3.] delete existing account")
-        print("[4.] exit")
+        print("\n--- Welcome to the XMPP Client Core Chat ---")
+        print("[1] log In")
+        print("[2] sign Up")
+        print("[3] delete existing account")
+        print("[4] exit")
         option = input("• enter your option: ")
-        
+
+        # --- log in ---
         if option == "1":
-            print("\ncredentials are required to log in.")
             username = input("-> username: ")
             password = input("-> password: ")
-            jid = f"{username}@{domain}"
+            jid = f"{username}@{DOMAIN}"
             xmppClient = Connection(jid, password)
             xmppClient.connect(disable_starttls=True, use_ssl=False)
             xmppClient.process(forever=False)
             if xmppClient.loggedIn:
                 print("you are in!")
-                
+        
+        # --- sign up ---
         elif option == "2":
-            print("\nlet's create a new account.")
-            username = input("-> username: ")
+            username = input("-> username (without @domain): ")
+            jid = f"{username}@{DOMAIN}"
             password = input("-> password: ")
-            jid = f"{username}@{domain}"
-            status = newUser(jid, password)
-            statusMessage = "\nyou just created an account!\n" if status else "\n!there was an error, try again\n"
-            print(statusMessage)
+            print(f"-> your full username is: {jid}")
+            newUser(jid, password)
+        
+        # --- delete account ---
         elif option == "3":
             pass
+        
+        # --- exit ---
         elif option == "4":
             break
+        
         else:
             print("!error, invalid option.")
 

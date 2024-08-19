@@ -37,21 +37,6 @@ class Connection(slixmpp.ClientXMPP):
         self.loggedIn = True
         self.disconnect()
 
-    # --- failed authentication ---
-    def failedAuth(self, event):
-        errorText = event.get('text', '')
-        errorCondition = event.get('condition', '')
-
-        if errorCondition:
-            errorMessage = f"!error condition: {errorCondition}"
-        elif errorText:
-            errorMessage = f"!error text: {errorText}"
-        else:
-            errorMessage = 'no error message provided'
-
-        print(f"!login failed: {errorMessage}")
-        self.disconnect()
-
 # --- sign up a new user ---
 def newUser(jid, password):
     

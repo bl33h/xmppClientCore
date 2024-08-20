@@ -12,7 +12,7 @@ import asyncio
 import logging
 from dotenv import load_dotenv
 from loggedActions import LoggedActions
-from connection import Connection, newUser
+from connection import newUser, Connection
 
 # configure logging to show only error messages
 logging.basicConfig(level=logging.ERROR)
@@ -23,9 +23,11 @@ load_dotenv()
 
 # get the domain from the .env file and prepare it using idna
 DOMAIN = os.getenv('DOMAIN')
-if DOMAIN:
-    DOMAIN = idna.encode(DOMAIN).decode('utf-8')
+if not DOMAIN:
+    raise ValueError("DOMAIN environment variable is not set or is empty.")
+DOMAIN = idna.encode(DOMAIN).decode('utf-8')
 
+# --- actions for everybody ---
 def main():
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
@@ -63,7 +65,7 @@ def main():
             break
         
         else:
-            print("!error, invalid option.")
+            print("!error, invalid option")
 
 if __name__ == "__main__":
     main()

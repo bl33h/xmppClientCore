@@ -19,3 +19,23 @@ def failedAuth(self, event):
 
     print(f"!login failed: {errorMessage}")
     self.disconnect()
+
+# --- plugins registration ---
+# reference: https://github.com/poezio/slixmpp/tree/master/slixmpp/plugins
+def pluginsInteraction(self):
+    self.register_plugin("xep_0004")
+    self.register_plugin("xep_0030")
+    self.register_plugin("xep_0045")
+    self.register_plugin("xep_0060")
+    self.register_plugin("xep_0050")
+    self.register_plugin("xep_0066")
+    self.register_plugin("xep_0071")
+    self.register_plugin("xep_0085")
+    self.register_plugin("xep_0199")
+    self.register_plugin("xep_0363")
+
+# --- handlers (events) registration ---
+def handlersInteraction(self):
+    self.add_event_handler("sessionStart", self.startSession)
+    self.add_event_handler("failedAuth", failedAuth)
+    self.add_event_handler("message", self.getMessages)

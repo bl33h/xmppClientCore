@@ -6,11 +6,9 @@
 # last modification: 19/08/2024
 # References: https://docs.python.org/3/library/asyncio.html, https://docs.python.org/3/library/logging.html, https://pypi.org/project/python-dotenv/
 
-import os
-import idna
 import asyncio
 import logging
-from dotenv import load_dotenv
+from criticalUt import loadDomain
 from loggedActions import LoggedActions
 from connection import newUser, Connection
 
@@ -18,14 +16,7 @@ from connection import newUser, Connection
 logging.basicConfig(level=logging.ERROR)
 logging.getLogger('slixmpp').setLevel(logging.ERROR)
 
-# load environment variables from .env file
-load_dotenv()
-
-# get the domain from the .env file and prepare it using idna
-DOMAIN = os.getenv('DOMAIN')
-if not DOMAIN:
-    raise ValueError("DOMAIN environment variable is not set or is empty.")
-DOMAIN = idna.encode(DOMAIN).decode('utf-8')
+DOMAIN = loadDomain()
 
 # --- actions for everybody ---
 def main():

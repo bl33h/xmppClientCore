@@ -3,25 +3,20 @@
 # author: Sara Echeverria
 # version: I
 # creation: 18/08/2024
-# last modification: 19/08/2024
+# last modification: 20/08/2024
 # References: https://docs.python.org/3/library/logging.html, https://pypi.org/project/slixmpp/, https://github.com/poezio/slixmpp
 # https://pypi.org/project/xmpppy/, https://pypi.org/project/python-dotenv/
 
-import os
 import xmpp
 import slixmpp
 import logging
-from dotenv import load_dotenv
+from criticalUt import loadDomain
 
 # configure logging to show only error messages
 logging.basicConfig(level=logging.ERROR)
 logging.getLogger('slixmpp').setLevel(logging.ERROR)
 
-# load environment variables from .env file
-load_dotenv()
-
-# get the domain from the .env file
-domain = os.getenv('DOMAIN')
+DOMAIN = loadDomain()
 
 class Connection(slixmpp.ClientXMPP):
     def __init__(self, jid, password):

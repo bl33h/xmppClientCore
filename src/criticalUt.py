@@ -3,7 +3,23 @@
 # author: Sara Echeverria
 # version: I
 # creation: 19/08/2024
-# last modification: 19/08/2024
+# last modification: 20/08/2024
+
+import os
+import idna
+from dotenv import load_dotenv
+
+# --- get and prepare the domain ---
+def loadDomain():
+    # load environment variables from .env file
+    load_dotenv()
+
+    # get the domain from the .env file and prepare it using idna
+    DOMAIN = os.getenv('DOMAIN')
+    if not DOMAIN:
+        raise ValueError("DOMAIN environment variable is not set or is empty.")
+    DOMAIN = idna.encode(DOMAIN).decode('utf-8')
+    return DOMAIN
 
 # --- failed authentication ---
 def failedAuth(self, event):
@@ -39,3 +55,4 @@ def handlersInteraction(self):
     self.add_event_handler("sessionStart", self.startSession)
     self.add_event_handler("failedAuth", failedAuth)
     self.add_event_handler("message", self.getMessages)
+    self.add_event_handler("messageNotis", self.messageNotis)

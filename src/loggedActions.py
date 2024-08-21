@@ -3,25 +3,16 @@
 # author: Sara Echeverria
 # version: I
 # creation: 19/08/2024
-# last modification: 19/08/2024
+# last modification: 20/08/2024
 # References: https://pypi.org/project/slixmpp/
 
-import os
-import idna
 import base64
 import slixmpp
 from aioconsole import ainput
-from dotenv import load_dotenv
-from criticalUt import failedAuth, pluginsInteraction, handlersInteraction
+from criticalUt import loadDomain, failedAuth, pluginsInteraction, handlersInteraction
 
-# load environment variables from .env file
-load_dotenv()
-
-# get the domain from the .env file and prepare it using idna
-DOMAIN = os.getenv('DOMAIN')
-if not DOMAIN:
-    raise ValueError("DOMAIN environment variable is not set or is empty.")
-DOMAIN = idna.encode(DOMAIN).decode('utf-8')
+# load and prepare the domain using the function
+DOMAIN = loadDomain()
 
 class LoggedActions(slixmpp.ClientXMPP):
     # --- logged user parameters ---
@@ -67,26 +58,76 @@ class LoggedActions(slixmpp.ClientXMPP):
     # --- receive messages ---
     # reference: https://slixmpp.readthedocs.io/en/latest/getting_started/sendlogout.html
     async def getMessages(self, message):
+        # file exclusive
+        # Reference: https://pypi.org/project/xmpp-http-upload/
         if message["type"] == "chat":
             if message["body"].startswith("file://"):
                 cont = message["body"].split("://")
                 ext = cont[1]
                 info = cont[2]
                 processedInfo = base64.b64decode(info)
-                with open(f"./files/received_file.{ext}", "wb") as fileW:
+                with open(f"./files/receivedFile.{ext}", "wb") as fileW:
                     fileW.write(processedInfo)
-                print(f"\n<!> {str(message['from']).split('/')[0]} has sent you a file: ./files/received_file.{ext}.\n")
+                print(f"\n❑  you just got a FILE from {str(message['from']).split('/')[0]}: ./files/receivedFile.{ext}.\n")
 
-            # unsupported type
+            # actual message (other types)
             else:
-                emitter = str(message["from"])
-                currentReceiver = emitter.split("/")[0]
+                groupSender = str(message["from"])
+                currentReceiver = groupSender.split("/")[0]
 
                 if currentReceiver == self.receiversCredential:
                     print(f"\n\n{currentReceiver}: {message['body']}")
                 else:
                     print(f"\n❑ you just got a message from [{currentReceiver}]\n")
+    
+    # --- join a room ---
+    async def joinGroup(self, roomsName):
+        # append the domain to the room name
+        fullRoomName = f"{roomsName}@conference.{DOMAIN}"
+        self.group = fullRoomName
+        
+        # join the group
+        await self.plugin["xep_0045"].join_muc(room=fullRoomName, nick=self.boundjid.user)
+        print(f"\nyou are currently chatting in {fullRoomName}.\n")
 
+        # group chat loop
+        while (True):
+
+            message = await ainput("type your message: ")
+
+            # exit the chat
+            if (message == "exit"):
+                self.current_chatting_jid = ""
+                self.plugin["xep_0045"].leave_muc(room=fullRoomName, nick=self.boundjid.user)
+                self.group = ""
+                break
+
+            # actual message
+            else:
+                print(f"{self.usersCredential.split('@')[0]}: {message}")
+                self.send_message(mto=fullRoomName, mbody=message, mtype="groupchat")
+    
+    # --- participate in different rooms ---
+    async def groupMessage(self):
+        print("1. join group")
+        print("2. exit\n")
+        roomsOpt = input("• enter your option: ")
+
+        if roomsOpt == "1":
+            joiningRoom = input("what's the room's name?: ")
+            await self.joinGroup(joiningRoom)
+
+        elif roomsOpt == "2":
+            pass
+    
+    # --- notify a group's message ---
+    async def messageNotis(self, message):
+        groupSender = message["mucnick"]
+
+        # process the notification
+        if (groupSender != self.boundjid.user):
+            print(f"❑ {groupSender} in {message['from']}: {message['body']}\n")
+    
     # --- actions available for the logged user ---
     async def actions(self):
         while self.loggedUser:
@@ -107,7 +148,7 @@ class LoggedActions(slixmpp.ClientXMPP):
             
             # --- send a group message ---
             elif option == "2":
-                pass
+                await self.groupMessage()
             
             # --- update status ---
             elif option == "3":

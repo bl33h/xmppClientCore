@@ -5,6 +5,7 @@
 # creation: 01/08/2024
 # last modification: 19/08/2024
 # References: https://docs.python.org/3/library/asyncio.html, https://docs.python.org/3/library/logging.html, https://pypi.org/project/python-dotenv/
+# https://xmpp.org/extensions/xep-0029.html
 
 import asyncio
 import logging

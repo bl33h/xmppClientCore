@@ -4,7 +4,7 @@
 # version: I
 # creation: 19/08/2024
 # last modification: 20/08/2024
-# References: https://pypi.org/project/slixmpp/
+# References: https://pypi.org/project/slixmpp/, https://xmpp.org/extensions/xep-0029.html
 
 import base64
 import slixmpp
@@ -25,8 +25,9 @@ class LoggedActions(slixmpp.ClientXMPP):
         handlersInteraction(self)
         pluginsInteraction(self)
         self.add_event_handler("session_start", self.startSession)
+        self.add_event_handler("message", self.messageNotis)
         self.add_event_handler("failed_auth", failedAuth)
-
+        
     # --- start the session ---
     async def startSession(self, event):
         self.send_presence(pshow="chat", pstatus="--- you are now connected to the chat ---")

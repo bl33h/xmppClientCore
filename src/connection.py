@@ -5,7 +5,7 @@
 # creation: 18/08/2024
 # last modification: 20/08/2024
 # References: https://docs.python.org/3/library/logging.html, https://pypi.org/project/slixmpp/, https://github.com/poezio/slixmpp
-# https://pypi.org/project/xmpppy/, https://pypi.org/project/python-dotenv/
+# https://pypi.org/project/xmpppy/, https://pypi.org/project/python-dotenv/, https://xmpp.org/extensions/xep-0029.html
 
 import xmpp
 import slixmpp
@@ -21,8 +21,6 @@ DOMAIN = loadDomain()
 class Connection(slixmpp.ClientXMPP):
     def __init__(self, jid, password):
         super().__init__(jid, password)
-        self.add_event_handler("session_start", self.startSession)
-        self.add_event_handler("failed_auth", self.failedAuth)
         self.loggedIn = False
 
     # --- start the session ---

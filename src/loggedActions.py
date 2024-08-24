@@ -177,7 +177,9 @@ class LoggedActions(slixmpp.ClientXMPP):
             
             # --- exit ---
             elif option == "7":
-                break
+                print("\n-> you just logged out (:")
+                self.disconnect()
+                self.loggedUser = False
 
             else:
                 print("!error, invalid option")

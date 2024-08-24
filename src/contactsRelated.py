@@ -3,7 +3,7 @@
 # author: Sara Echeverria
 # version: I
 # creation: 19/08/2024
-# last modification: 23/08/2024
+# last modification: 24/08/2024
 # References: https://pypi.org/project/slixmpp/, https://xmpp.org/extensions/xep-0029.html
 
 import slixmpp
@@ -51,11 +51,11 @@ async def changeStatus(self):
     if status == "1":
         presence = "available"
     elif status == "2":
-        presence = "extended away"
+        presence = "xa"
     elif status == "3":
         presence = "away"
     elif status == "4":
-        presence = "do not disturb"
+        presence = "dnd"
     else:
         presence = "available"
 

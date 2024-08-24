@@ -14,10 +14,10 @@ DOMAIN = loadDomain()
 
 # --- send a friend request ---
 async def sendFriendRequest(xmpp_client: slixmpp.ClientXMPP):
-    yourUsername = input("who would you like to send a friend request to? (username): ")
-    potentialContactUsername = f"{yourUsername}@{DOMAIN}"
-    xmpp_client.send_presence_subscription(potentialContactUsername)
-    print("-> you just sent a friend request to", potentialContactUsername)
+    friendsUser = input("who would you like to send a friend request to? (username): ")
+    potentialFriendsUser = f"{friendsUser}@{DOMAIN}"
+    xmpp_client.send_presence_subscription(potentialFriendsUser)
+    print("-> you just sent a friend request to", potentialFriendsUser)
     await xmpp_client.get_roster()
 
 # --- manage incoming requests ---
@@ -27,14 +27,14 @@ async def requestsManagement(xmpp_client: slixmpp.ClientXMPP, presence):
     # reciprocate the subscription request
     if presence["type"] == "subscribe":
         xmpp_client.send_presence(pto=presence['from'], ptype='subscribed')
-        if not xmpp_client.client_roster[presence['from']].subscription_to:
+        if not xmpp_client.usersContacts[presence['from']].subscription_to:
             xmpp_client.send_presence_subscription(presence['from'], ptype='subscribe')
         print(f"accepted and reciprocated subscription with {presence['from']}")
     
     # confirm mutual subscription status
     elif presence['type'] == 'subscribed':
         await xmpp_client.get_roster()
-        roster_item = xmpp_client.client_roster[presence['from']]
+        roster_item = xmpp_client.usersContacts[presence['from']]
         if not (roster_item['subscription_to'] and roster_item['subscription_from']):
             print("subscription not mutual, fixing...")
             xmpp_client.send_presence_subscription(presence['from'], ptype='subscribe')
@@ -62,3 +62,51 @@ async def changeStatus(self):
     description = input("your description will be: ")
     self.send_presence(pshow=presence, pstatus=description)
     await self.get_roster()
+
+# --- show contact's information ---
+async def friendsInfo(self):
+    friendsUser = input("\nwhat's the contact you would like to check? (username): ")
+    fullUsername = f"{friendsUser}@{DOMAIN}"
+
+    # user's contacts
+    usersContacts = self.client_roster
+
+    # unexisting user
+    found = False
+
+    if not usersContacts:
+        print("\n!error, no contacts found !")
+        return
+
+    # presence mapping
+    presenceMapping = {
+        "available": "available",
+        "xa": "extended away",
+        "away": "away",
+        "dnd": "do not disturb"
+    }
+
+    # check if the user is in the contacts
+    for contact in usersContacts.keys():
+        
+        if contact == fullUsername:
+
+            found = True
+            print(f"\n-> friend's full user: {contact}")
+
+            presenceVal = "Offline"
+            status = "None"
+
+            # friends info
+            for _, presence in usersContacts.presence(contact).items():
+                presenceType = presence["show"] or "Offline"
+                presenceVal = presenceMapping.get(presenceType, "Offline")
+
+                status = presence["status"] or "None"
+
+            print(f"-> friends status: {presenceVal}")
+            print(f"-> friends description: {status}\n")
+
+    # user not in the contacts
+    if not found:
+        print("\n!you are not friends with this user, send a friend request to get more info !")

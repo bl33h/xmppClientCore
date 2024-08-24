@@ -3,13 +3,13 @@
 # author: Sara Echeverria
 # version: I
 # creation: 19/08/2024
-# last modification: 20/08/2024
+# last modification: 24/08/2024
 # References: https://pypi.org/project/slixmpp/, https://xmpp.org/extensions/xep-0029.html
 
 import base64
 import slixmpp
 from aioconsole import ainput
-from contactsRelated import sendFriendRequest, changeStatus
+from contactsRelated import sendFriendRequest, changeStatus, friendsInfo
 from criticalUt import loadDomain, failedAuth, pluginsInteraction, handlersInteraction
 
 # load and prepare the domain using the function
@@ -141,7 +141,6 @@ class LoggedActions(slixmpp.ClientXMPP):
     # --- actions available for the logged user ---
     async def actions(self):
         while self.loggedUser:
-            print("you are in!")
             print("\n--- You are currently logged in and your options are ---")
             print("[1] send a message")
             print("[2] send a group message")
@@ -170,7 +169,7 @@ class LoggedActions(slixmpp.ClientXMPP):
             
             # --- check the info of a specific contact ---
             elif option == "5":
-                pass
+                await friendsInfo(self)
             
             # --- add a contact ---
             elif option == "6":

@@ -9,6 +9,7 @@
 import base64
 import slixmpp
 from aioconsole import ainput
+from contactsRelated import sendFriendRequest
 from criticalUt import loadDomain, failedAuth, pluginsInteraction, handlersInteraction
 
 # load and prepare the domain using the function
@@ -25,6 +26,7 @@ class LoggedActions(slixmpp.ClientXMPP):
         handlersInteraction(self)
         pluginsInteraction(self)
         self.add_event_handler("session_start", self.startSession)
+        self.add_event_handler("presence", self.friendRequestManagement)
         self.add_event_handler("message", self.messageNotis)
         self.add_event_handler("failed_auth", failedAuth)
         
@@ -37,7 +39,7 @@ class LoggedActions(slixmpp.ClientXMPP):
 
     # --- send a direct message ---
     async def directMessage(self):
-        username = input("who would you like to send a message to? (username): ")
+        username = input("who would you like to send a message to ? (username): ")
         dmReceiver = f"{username}@{DOMAIN}"
         self.receiversCredential = dmReceiver
         print(f"\nyou are currently chatting with {dmReceiver}.")
@@ -129,6 +131,13 @@ class LoggedActions(slixmpp.ClientXMPP):
         if (groupSender != self.boundjid.user):
             print(f"❑ {groupSender} in {message['from']}: {message['body']}\n")
     
+    # --- friend request management ---
+    async def friendRequestManagement(self, presence):
+        if presence["type"] == "subscribe":
+            self.send_presence_subscription(pto=presence["from"], ptype="subscribed")
+            await self.get_roster()
+            print(f"\n❑ {presence['from']} is your friend now !\n")
+            
     # --- actions available for the logged user ---
     async def actions(self):
         while self.loggedUser:
@@ -165,7 +174,7 @@ class LoggedActions(slixmpp.ClientXMPP):
             
             # --- add a contact ---
             elif option == "6":
-                pass
+                await sendFriendRequest(self)
             
             # --- exit ---
             elif option == "7":

@@ -9,7 +9,7 @@
 import base64
 import slixmpp
 from aioconsole import ainput
-from contactsRelated import sendFriendRequest
+from contactsRelated import sendFriendRequest, changeStatus
 from criticalUt import loadDomain, failedAuth, pluginsInteraction, handlersInteraction
 
 # load and prepare the domain using the function
@@ -162,7 +162,7 @@ class LoggedActions(slixmpp.ClientXMPP):
             
             # --- update status ---
             elif option == "3":
-                pass
+                await changeStatus(self)
             
             # --- view contacts ---
             elif option == "4":

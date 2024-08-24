@@ -38,3 +38,27 @@ async def requestsManagement(xmpp_client: slixmpp.ClientXMPP, presence):
         if not (roster_item['subscription_to'] and roster_item['subscription_from']):
             print("subscription not mutual, fixing...")
             xmpp_client.send_presence_subscription(presence['from'], ptype='subscribe')
+
+# --- change the status ---
+async def changeStatus(self):
+    print("\t[1] available")
+    print("\t[2] extended away")
+    print("\t[3] away")
+    print("\t[4] do not disturb")
+    status = input("\nwhat's the number of the status you would like to change to ?: ")
+
+    # available options
+    if status == "1":
+        presence = "available"
+    elif status == "2":
+        presence = "extended away"
+    elif status == "3":
+        presence = "away"
+    elif status == "4":
+        presence = "do not disturb"
+    else:
+        presence = "available"
+
+    description = input("your description will be: ")
+    self.send_presence(pshow=presence, pstatus=description)
+    await self.get_roster()

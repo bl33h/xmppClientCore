@@ -92,7 +92,7 @@ async def friendsInfo(self):
         if contact == fullUsername:
 
             found = True
-            print(f"\n-> friend's full user: {contact}")
+            print(f"\n-> friend's full username: {contact}")
 
             presenceVal = "Offline"
             status = "None"
@@ -110,3 +110,30 @@ async def friendsInfo(self):
     # user not in the contacts
     if not found:
         print("\n!you are not friends with this user, send a friend request to get more info !")
+
+# --- show the list of contacts ---
+async def friendsList(self):
+
+    usersContacts = self.client_roster
+
+    # empty list
+    if (not usersContacts):
+        print("you have no contacts yet, send a friend request to get started !")
+        return
+
+    # friends in the list
+    for contact in usersContacts.keys():
+
+        if (contact == self.boundjid.bare):
+            continue
+
+        print(f"\n• friend's full username: [{contact}]")
+        presenceVal = "offline"
+        status = "none"
+
+        for _, presence in usersContacts.presence(contact).items():
+            presenceVal = presence["show"] or "offline"
+            status = presence["status"] or "none"
+
+        print(f"-> friends status: {presenceVal}")
+        print(f"-> friends description: {status}")

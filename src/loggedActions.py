@@ -9,7 +9,7 @@
 import base64
 import slixmpp
 from aioconsole import ainput
-from contactsRelated import sendFriendRequest, changeStatus, friendsInfo
+from contactsRelated import sendFriendRequest, changeStatus, friendsInfo, friendsList
 from criticalUt import loadDomain, failedAuth, pluginsInteraction, handlersInteraction
 
 # load and prepare the domain using the function
@@ -117,7 +117,7 @@ class LoggedActions(slixmpp.ClientXMPP):
         roomsOpt = input("• enter your option: ")
 
         if roomsOpt == "1":
-            joiningRoom = input("what's the room's name?: ")
+            joiningRoom = input("\nwhat's the room's name ?: ")
             await self.joinGroup(joiningRoom)
 
         elif roomsOpt == "2":
@@ -165,7 +165,7 @@ class LoggedActions(slixmpp.ClientXMPP):
             
             # --- view contacts ---
             elif option == "4":
-                pass
+                await friendsList(self)
             
             # --- check the info of a specific contact ---
             elif option == "5":

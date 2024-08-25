@@ -3,7 +3,7 @@
 # author: Sara Echeverria
 # version: I
 # creation: 19/08/2024
-# last modification: 20/08/2024
+# last modification: 24/08/2024
 
 import os
 import idna
@@ -25,7 +25,7 @@ def loadDomain():
 def failedAuth(event):
     errorText = event.get('text', '')
     errorCondition = event.get('condition', '')
-    errorMessage = "Unknown error occurred"
+    errorMessage = "unknown error occurred"
     if errorCondition:
         errorMessage = f"error condition: {errorCondition}"
     elif errorText:

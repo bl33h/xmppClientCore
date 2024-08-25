@@ -9,9 +9,10 @@
 
 import asyncio
 import logging
+from connection import newUser
 from criticalUt import loadDomain
+from deleteAccount import DeleteExistentAccount
 from loggedActions import LoggedActions
-from connection import newUser, Connection
 
 # configure logging to show only error messages
 logging.basicConfig(level=logging.ERROR)
@@ -53,9 +54,9 @@ def main():
             username = input("-> username (without @domain): ")
             jid = f"{username}@{DOMAIN}"
             password = input("-> password: ")
-            xmpp_delete = Connection(jid, password)
+            xmpp_delete = DeleteExistentAccount(jid, password)
             xmpp_delete.connect(disable_starttls=True, use_ssl=False)
-            asyncio.run(xmpp_delete.process(forever=False))
+            xmpp_delete.process(forever=False)
         
         # --- exit ---
         elif option == "4":

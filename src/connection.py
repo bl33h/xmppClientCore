@@ -32,7 +32,6 @@ class Connection(slixmpp.ClientXMPP):
 
 # --- sign up a new user ---
 def newUser(jid, password):
-    
     # connect to the server
     xmppJid = xmpp.JID(jid)
     xmppAccount = xmpp.Client(xmppJid.getDomain(), debug=[])

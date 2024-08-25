@@ -25,6 +25,7 @@ class DeleteExistentAccount(slixmpp.ClientXMPP):
 
     # --- start the session ---
     async def start(self, event):
+        
         self.send_presence()
         await self.get_roster()
         await self.deleteAccount()

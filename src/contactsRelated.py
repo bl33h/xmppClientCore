@@ -26,6 +26,7 @@ async def requestsManagement(xmpp_client: slixmpp.ClientXMPP, presence):
    
     # reciprocate the subscription request
     if presence["type"] == "subscribe":
+        
         xmpp_client.send_presence(pto=presence['from'], ptype='subscribed')
         if not xmpp_client.usersContacts[presence['from']].subscription_to:
             xmpp_client.send_presence_subscription(presence['from'], ptype='subscribe')
@@ -113,7 +114,6 @@ async def friendsInfo(self):
 
 # --- show the list of contacts ---
 async def friendsList(self):
-
     usersContacts = self.client_roster
 
     # empty list

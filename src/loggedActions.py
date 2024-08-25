@@ -18,6 +18,7 @@ DOMAIN = loadDomain()
 class LoggedActions(slixmpp.ClientXMPP):
     # --- logged user parameters ---
     def __init__(self, jid, password):
+        
         super().__init__(jid=jid, password=password)
         self.receiversCredential = ""
         self.usersCredential = jid
@@ -57,32 +58,7 @@ class LoggedActions(slixmpp.ClientXMPP):
             else:
                 print(f"{self.usersCredential.split('@')[0]}: {message}")
                 self.send_message(mto=dmReceiver, mbody=message, mtype="chat")
-    
-    # --- receive messages ---
-    # reference: https://slixmpp.readthedocs.io/en/latest/getting_started/sendlogout.html
-    async def getMessages(self, message):
-        # file exclusive
-        # Reference: https://pypi.org/project/xmpp-http-upload/
-        if message["type"] == "chat":
-            if message["body"].startswith("file://"):
-                cont = message["body"].split("://")
-                ext = cont[1]
-                info = cont[2]
-                processedInfo = base64.b64decode(info)
-                with open(f"./files/receivedFile.{ext}", "wb") as fileW:
-                    fileW.write(processedInfo)
-                print(f"\n❑  you just got a FILE from {str(message['from']).split('/')[0]}: ./files/receivedFile.{ext}.\n")
-
-            # actual message (other types)
-            else:
-                groupSender = str(message["from"])
-                currentReceiver = groupSender.split("/")[0]
-
-                if currentReceiver == self.receiversCredential:
-                    print(f"\n\n{currentReceiver}: {message['body']}")
-                else:
-                    print(f"\n❑ you just got a message from [{currentReceiver}]\n")
-    
+                
     # --- join a room ---
     async def joinGroup(self, roomsName):
         # append the domain to the room name
@@ -112,16 +88,8 @@ class LoggedActions(slixmpp.ClientXMPP):
     
     # --- participate in different rooms ---
     async def groupMessage(self):
-        print("1. join group")
-        print("2. exit\n")
-        roomsOpt = input("• enter your option: ")
-
-        if roomsOpt == "1":
-            joiningRoom = input("\nwhat's the room's name ?: ")
-            await self.joinGroup(joiningRoom)
-
-        elif roomsOpt == "2":
-            pass
+        joiningRoom = input("\nwhat's the room's name ?: ")
+        await self.joinGroup(joiningRoom)
     
     # --- notify a group's message ---
     async def messageNotis(self, message):
@@ -137,10 +105,26 @@ class LoggedActions(slixmpp.ClientXMPP):
             self.send_presence_subscription(pto=presence["from"], ptype="subscribed")
             await self.get_roster()
             print(f"\n❑ {presence['from']} is your friend now !\n")
+    
+    # --- sending a file ---
+    async def sendFile(self):
+        username = input("who would you like to send a file to ? (username): ")
+        receptor = f"{username}@{DOMAIN}"
+        path = input("what's the file's path ?: ")
+
+        # raw file and extension processing
+        ext = path.split(".")[-1]
+        file = open(path, "rb")
+        rawData = file.read()
+
+        rawFile = base64.b64encode(rawData).decode()
+        print("rawFile", rawFile)
+        self.send_message(mto=receptor, mbody=f"file://{ext}://{rawFile}", mtype="chat")
             
     # --- actions available for the logged user ---
     async def actions(self):
         while self.loggedUser:
+            
             print("\n--- You are currently logged in and your options are ---")
             print("[1] send a message")
             print("[2] send a group message")
@@ -148,8 +132,9 @@ class LoggedActions(slixmpp.ClientXMPP):
             print("[4] view contacts")
             print("[5] check the info of a specific contact")
             print("[6] add a contact")
-            print("[7] exit")
-            option = input("• enter your option: ")
+            print("[7] send a file to a specific contact")
+            print("[8] exit")
+            option = input("\n• enter your option: ")
 
             # --- send a dm ---
             if option == "1":
@@ -175,8 +160,12 @@ class LoggedActions(slixmpp.ClientXMPP):
             elif option == "6":
                 await sendFriendRequest(self)
             
-            # --- exit ---
+            # --- send a file ---
             elif option == "7":
+                await self.sendFile()
+            
+            # --- exit ---
+            elif option == "8":
                 print("\n-> you just logged out (:")
                 self.disconnect()
                 self.loggedUser = False

@@ -3,11 +3,12 @@
 # author: Sara Echeverria
 # version: I
 # creation: 19/08/2024
-# last modification: 24/08/2024
+# last modification: 25/08/2024
 # References: https://pypi.org/project/slixmpp/, https://xmpp.org/extensions/xep-0029.html
 
 import base64
 import slixmpp
+import asyncio
 from aioconsole import ainput
 from contactsRelated import sendFriendRequest, changeStatus, friendsInfo, friendsList
 from criticalUt import loadDomain, failedAuth, pluginsInteraction, handlersInteraction
@@ -120,7 +121,32 @@ class LoggedActions(slixmpp.ClientXMPP):
         rawFile = base64.b64encode(rawData).decode()
         print("rawFile", rawFile)
         self.send_message(mto=receptor, mbody=f"file://{ext}://{rawFile}", mtype="chat")
+    
+    # --- create a group ---
+    async def groupCreation(self, roomsName):
+        try:
+            fullRoomName = f"{roomsName}@conference.{DOMAIN}"
             
+            # handler to ensure the current user has joined the room
+            def on_room_join(event):
+                # room's config
+                form = self.plugin["xep_0004"].make_form(ftype='submit', title="Configuration Form")
+                form.add_field(var="muc#roomconfig_roomname", value=roomsName)
+                form.add_field(var="muc#roomconfig_persistentroom", value=True)
+                form.add_field(var="muc#roomconfig_publicroom", value=True)
+                form.add_field(var="muc#roomconfig_roomdesc", value="This is a room for chatting.")
+                
+                # send the room's configuration
+                asyncio.create_task(self.plugin["xep_0045"].set_room_config(fullRoomName, form))
+                print(f"✔ the room [{roomsName}] is ready to use")
+
+            # join the room and attach the handler
+            self.add_event_handler("muc::%s::got_online" % fullRoomName, on_room_join)
+            await self.plugin["xep_0045"].join_muc(fullRoomName, self.boundjid.user)
+
+        except Exception as e:
+            print(f"\n!error, group couldn't be created: {str(e)}")
+    
     # --- actions available for the logged user ---
     async def actions(self):
         while self.loggedUser:
@@ -128,12 +154,13 @@ class LoggedActions(slixmpp.ClientXMPP):
             print("\n--- You are currently logged in and your options are ---")
             print("[1] send a message")
             print("[2] send a group message")
-            print("[3] update status (presence)")
-            print("[4] view contacts")
-            print("[5] check the info of a specific contact")
-            print("[6] add a contact")
-            print("[7] send a file to a specific contact")
-            print("[8] exit")
+            print("[3] create a group")
+            print("[4] update status (presence)")
+            print("[5] view contacts")
+            print("[6] check the info of a specific contact")
+            print("[7] add a contact")
+            print("[8] send a file to a specific contact")
+            print("[9] exit")
             option = input("\n• enter your option: ")
 
             # --- send a dm ---
@@ -144,28 +171,33 @@ class LoggedActions(slixmpp.ClientXMPP):
             elif option == "2":
                 await self.groupMessage()
             
-            # --- update status ---
+            # --- create a group ---
             elif option == "3":
+                potentialRoom = input("-> what will your room's name be? : ")
+                await self.groupCreation(potentialRoom)
+            
+            # --- update status ---
+            elif option == "4":
                 await changeStatus(self)
             
             # --- view contacts ---
-            elif option == "4":
+            elif option == "5":
                 await friendsList(self)
             
             # --- check the info of a specific contact ---
-            elif option == "5":
+            elif option == "6":
                 await friendsInfo(self)
             
             # --- add a contact ---
-            elif option == "6":
+            elif option == "7":
                 await sendFriendRequest(self)
             
             # --- send a file ---
-            elif option == "7":
+            elif option == "8":
                 await self.sendFile()
             
             # --- exit ---
-            elif option == "8":
+            elif option == "9":
                 print("\n-> you just logged out (:")
                 self.disconnect()
                 self.loggedUser = False

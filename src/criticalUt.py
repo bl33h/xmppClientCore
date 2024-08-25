@@ -22,19 +22,15 @@ def loadDomain():
     return DOMAIN
 
 # --- failed authentication ---
-def failedAuth(self, event):
+def failedAuth(event):
     errorText = event.get('text', '')
     errorCondition = event.get('condition', '')
-
+    errorMessage = "Unknown error occurred"
     if errorCondition:
-        errorMessage = f"!error condition: {errorCondition}"
+        errorMessage = f"error condition: {errorCondition}"
     elif errorText:
-        errorMessage = f"!error text: {errorText}"
-    else:
-        errorMessage = 'no error message provided'
-
+        errorMessage = f"error text: {errorText}"
     print(f"!login failed: {errorMessage}")
-    self.disconnect()
 
 # --- plugins registration ---
 # reference: https://github.com/poezio/slixmpp/tree/master/slixmpp/plugins

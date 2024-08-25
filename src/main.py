@@ -3,16 +3,18 @@
 # author: Sara Echeverria
 # version: I
 # creation: 01/08/2024
-# last modification: 19/08/2024
+# last modification: 25/08/2024
 # References: https://docs.python.org/3/library/asyncio.html, https://docs.python.org/3/library/logging.html, https://pypi.org/project/python-dotenv/
 # https://xmpp.org/extensions/xep-0029.html
 
 import asyncio
 import logging
+import tkinter as tk
+from tkinter import messagebox
 from connection import newUser
 from criticalUt import loadDomain
-from deleteAccount import DeleteExistentAccount
 from loggedActions import LoggedActions
+from deleteAccount import DeleteExistentAccount
 
 # configure logging to show only error messages
 logging.basicConfig(level=logging.ERROR)
@@ -20,50 +22,103 @@ logging.getLogger('slixmpp').setLevel(logging.ERROR)
 
 DOMAIN = loadDomain()
 
-# --- actions for everybody ---
-def main():
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+# --- dialog for login, sign up and account deletion ---
+class LoginDialog(tk.Toplevel):
+    def __init__(self, parent, title, message, dialog_width=500, entry_width=30):
+        super().__init__(parent)
+        self.transient(parent)
+        self.title(title)
+        self.result = None
 
-    while True:
-        print("\n--- Welcome to the XMPP Client Core Chat ---")
-        print("[1] log in")
-        print("[2] sign up")
-        print("[3] delete existing account")
-        print("[4] exit")
-        option = input("• enter your option: ")
+        tk.Label(self, text=message).pack(pady=10)
 
-        # --- log in ---
-        if option == "1":
-            username = input("-> username: ")
-            password = input("-> password: ")
-            jid = f"{username}@{DOMAIN}"
-            xmppClient = LoggedActions(jid, password)
-            xmppClient.connect(disable_starttls=True, use_ssl=False)
-            xmppClient.process(forever=False)
-        
-        # --- sign up ---
-        elif option == "2":
-            username = input("-> username (without @domain): ")
-            jid = f"{username}@{DOMAIN}"
-            password = input("-> password: ")
-            print(f"-> your full username is: {jid}")
-            newUser(jid, password)
-        
-        # --- delete account ---
-        elif option == "3":
-            username = input("-> username (without @domain): ")
-            jid = f"{username}@{DOMAIN}"
-            password = input("-> password: ")
-            xmpp_delete = DeleteExistentAccount(jid, password)
-            xmpp_delete.connect(disable_starttls=True, use_ssl=False)
-            xmpp_delete.process(forever=False)
-        
-        # --- exit ---
-        elif option == "4":
-            break
-        
+        # entries
+        self.username_entry = tk.Entry(self, width=entry_width)
+        self.username_entry.pack(pady=5)
+        self.password_entry = tk.Entry(self, show="*", width=entry_width)
+        self.password_entry.pack(pady=5)
+
+        # frame for buttons
+        self.button_frame = tk.Frame(self)
+        self.button_frame.pack(pady=10)
+
+        # buttons
+        tk.Button(self.button_frame, text="Ok", command=self.onOk).pack(side=tk.LEFT)
+        tk.Label(self.button_frame, width=2).pack(side=tk.LEFT)
+        tk.Button(self.button_frame, text="Cancel", command=self.destroy).pack(side=tk.LEFT)
+
+        # set focus on the username entry
+        self.grab_set()
+        self.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.geometry(f"{dialog_width}x200+{parent.winfo_rootx() + 50}+{parent.winfo_rooty() + 50}")
+        self.username_entry.focus_set()
+        self.wait_window(self)
+
+    def onOk(self):
+        self.result = (self.username_entry.get(), self.password_entry.get())
+        self.destroy()
+
+# --- main user interface ---
+class SimpleUserInterface:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("XMPP Client Core Chat")
+        self.root.geometry("500x300")
+
+        self.login_btn = tk.Button(self.root, text="Log In", command=self.login)
+        self.login_btn.pack(pady=5)
+
+        self.signup_btn = tk.Button(self.root, text="Sign Up", command=self.signup)
+        self.signup_btn.pack(pady=5)
+
+        self.deleteAccount_btn = tk.Button(self.root, text="Delete Existing Account", command=self.deleteAccount)
+        self.deleteAccount_btn.pack(pady=5)
+
+        self.exit_btn = tk.Button(self.root, text="Exit", command=self.root.destroy)
+        self.exit_btn.pack(pady=5)
+
+    # --- log in ---
+    def login(self):
+        dialog = LoginDialog(self.root, "Log In", "Enter your credentials:", dialog_width=500, entry_width=30)
+        if dialog.result:
+            username, password = dialog.result
+            if username and password:
+                jid = f"{username}@{DOMAIN}"
+                xmpp_client = LoggedActions(jid, password)
+                xmpp_client.connect(disable_starttls=True, use_ssl=False)
+                xmpp_client.process(forever=False)
+
+    # --- sign up ---
+    def signup(self):
+        dialog = LoginDialog(self.root, "Sign Up", "Enter your credentials:", dialog_width=500, entry_width=30)
+        if dialog.result:
+            username, password = dialog.result
+            if username and password:
+                jid = f"{username}@{DOMAIN}"
+                newUser(jid, password)
+                messagebox.showinfo("Sign Up", f"Account created, your full username is: [{jid}]")
+
+    # --- delete account ---
+    def deleteAccount(self):
+        dialog = LoginDialog(self.root, "Delete Account", "Enter your credentials for account deletion:", dialog_width=500, entry_width=30)
+        if dialog.result:
+            username, password = dialog.result
+            if username and password:
+                jid = f"{username}@{DOMAIN}"
+                xmpp_delete = DeleteExistentAccount(jid, password)
+                xmpp_delete.connect(disable_starttls=True, use_ssl=False)
+                xmpp_delete.process(forever=False)
+                self.root.after(500, lambda: self.checkDeletionStatus(xmpp_delete))
+
+    # --- check if the account has been deleted ---
+    def checkDeletionStatus(self, xmpp_delete):
+        if not xmpp_delete.is_connected():
+            messagebox.showinfo("Delete Account", f"!The account [{xmpp_delete.boundjid.bare}] has been deleted")
         else:
-            print("!error, invalid option")
+            self.root.after(500, lambda: self.checkDeletionStatus(xmpp_delete))
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    app = SimpleUserInterface(root)
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    root.mainloop()

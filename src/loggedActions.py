@@ -25,8 +25,8 @@ class LoggedActions(slixmpp.ClientXMPP):
         self.group = ""
         handlersInteraction(self)
         pluginsInteraction(self)
-        self.add_event_handler("session_start", self.startSession)
         self.add_event_handler("presence", self.friendRequestManagement)
+        self.add_event_handler("session_start", self.startSession)
         self.add_event_handler("message", self.messageNotis)
         self.add_event_handler("failed_auth", failedAuth)
         

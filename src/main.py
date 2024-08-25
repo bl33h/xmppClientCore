@@ -50,7 +50,12 @@ def main():
         
         # --- delete account ---
         elif option == "3":
-            pass
+            username = input("-> username (without @domain): ")
+            jid = f"{username}@{DOMAIN}"
+            password = input("-> password: ")
+            xmpp_delete = Connection(jid, password)
+            xmpp_delete.connect(disable_starttls=True, use_ssl=False)
+            asyncio.run(xmpp_delete.process(forever=False))
         
         # --- exit ---
         elif option == "4":

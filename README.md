@@ -22,7 +22,7 @@
 
 ## Features
 The project provides the following features:
-- 
+
 
 ## How To Use
 To clone and run this application, you'll need [Git](https://git-scm.com), [Python](https://www.python.org), [slixmpp](https://slixmpp.readthedocs.io/en/latest/), [base64](https://docs.python.org/3/library/base64.html), [asyncio](https://docs.python.org/3/library/asyncio.html), and [Tkinter](https://docs.python.org/es/3/library/tkinter.html) installed on your computer. From your command line:

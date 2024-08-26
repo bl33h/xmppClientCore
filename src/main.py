@@ -10,6 +10,7 @@
 import asyncio
 import logging
 import tkinter as tk
+from tkinter import font
 from tkinter import messagebox
 from connection import newUser
 from criticalUt import loadDomain
@@ -30,22 +31,23 @@ class LoginDialog(tk.Toplevel):
         self.title(title)
         self.result = None
 
-        tk.Label(self, text=message).pack(pady=10)
+        self.configure(bg='#797fa2')
+
+        tk.Label(self, text=message, bg='#797fa2', fg='#dbdcf3', font=('Helvetica', 12)).pack(pady=10)
 
         # entries
-        self.username_entry = tk.Entry(self, width=entry_width)
+        self.username_entry = tk.Entry(self, width=entry_width, bg='#dbdcf3', fg='#000000', font=('Helvetica', 12))
         self.username_entry.pack(pady=5)
-        self.password_entry = tk.Entry(self, show="*", width=entry_width)
+        self.password_entry = tk.Entry(self, show="*", width=entry_width, bg='#dbdcf3', fg='#000000', font=('Helvetica', 12))
         self.password_entry.pack(pady=5)
 
         # frame for buttons
-        self.button_frame = tk.Frame(self)
+        self.button_frame = tk.Frame(self, bg='#797fa2')
         self.button_frame.pack(pady=10)
 
         # buttons
-        tk.Button(self.button_frame, text="Ok", command=self.onOk).pack(side=tk.LEFT)
-        tk.Label(self.button_frame, width=2).pack(side=tk.LEFT)
-        tk.Button(self.button_frame, text="Cancel", command=self.destroy).pack(side=tk.LEFT)
+        tk.Button(self.button_frame, text="Ok", command=self.onOk, bg='#797fa2', fg='#dbdcf3', font=('Helvetica', 12)).pack(side=tk.LEFT, padx=5)
+        tk.Button(self.button_frame, text="Cancel", command=self.destroy, bg='#797fa2', fg='#dbdcf3', font=('Helvetica', 12)).pack(side=tk.LEFT, padx=5)
 
         # set focus on the username entry
         self.grab_set()
@@ -64,22 +66,38 @@ class SimpleUserInterface:
         self.root = root
         self.root.title("XMPP Client Core Chat")
         self.root.geometry("500x300")
+        self.root.configure(bg='#797fa2')
 
-        self.login_btn = tk.Button(self.root, text="Log In", command=self.login)
+        # Create a frame to center the widgets
+        self.frame = tk.Frame(self.root, bg='#797fa2')
+        self.frame.pack(expand=True)
+
+        # Add a welcome label with bold font
+        bold_font = font.Font(family="Helvetica", size=14, weight="bold")
+        self.welcome_label = tk.Label(self.frame, text="Welcome to XMPP Client Core Chat", bg='#797fa2', fg='#dbdcf3', font=bold_font)
+        self.welcome_label.pack(pady=10)
+
+        # Add an instructions label with smaller font
+        small_font = font.Font(family="Helvetica", size=10)
+        self.instructions_label = tk.Label(self.frame, text="choose an option below to proceed, enjoy ! - sara", bg='#797fa2', fg='#dbdcf3', font=small_font)
+        self.instructions_label.pack(pady=5)
+
+        # Create buttons with updated styles
+        self.login_btn = tk.Button(self.frame, text="Log In", command=self.login, bg='#797fa2', fg='#dbdcf3', font=('Helvetica', 12))
         self.login_btn.pack(pady=5)
 
-        self.signup_btn = tk.Button(self.root, text="Sign Up", command=self.signup)
+        self.signup_btn = tk.Button(self.frame, text="Sign Up", command=self.signup, bg='#797fa2', fg='#dbdcf3', font=('Helvetica', 12))
         self.signup_btn.pack(pady=5)
 
-        self.deleteAccount_btn = tk.Button(self.root, text="Delete Existing Account", command=self.deleteAccount)
+        self.deleteAccount_btn = tk.Button(self.frame, text="Delete Existing Account", command=self.deleteAccount, bg='#797fa2', fg='#dbdcf3', font=('Helvetica', 12))
         self.deleteAccount_btn.pack(pady=5)
 
-        self.exit_btn = tk.Button(self.root, text="Exit", command=self.root.destroy)
+        self.exit_btn = tk.Button(self.frame, text="Exit", command=self.root.destroy, bg='#797fa2', fg='#dbdcf3', font=('Helvetica', 12))
         self.exit_btn.pack(pady=5)
 
     # --- log in ---
     def login(self):
-        dialog = LoginDialog(self.root, "Log In", "Enter your credentials:", dialog_width=500, entry_width=30)
+        dialog = LoginDialog(self.root, "Log In", "Enter your credentials to log in !\nremember that you don't need to place the domain", dialog_width=500, entry_width=30)
         if dialog.result:
             username, password = dialog.result
             if username and password:
@@ -90,7 +108,7 @@ class SimpleUserInterface:
 
     # --- sign up ---
     def signup(self):
-        dialog = LoginDialog(self.root, "Sign Up", "Enter your credentials:", dialog_width=500, entry_width=30)
+        dialog = LoginDialog(self.root, "Sign Up", "Enter your credentials to create your account!\nremember that you don't need to place the domain", dialog_width=500, entry_width=30)
         if dialog.result:
             username, password = dialog.result
             if username and password:
@@ -113,7 +131,7 @@ class SimpleUserInterface:
     # --- check if the account has been deleted ---
     def checkDeletionStatus(self, xmpp_delete):
         if not xmpp_delete.is_connected():
-            messagebox.showinfo("Delete Account", f"!The account [{xmpp_delete.boundjid.bare}] has been deleted")
+            messagebox.showinfo("Delete Account", f"The account [{xmpp_delete.boundjid.bare}] has been deleted")
         else:
             self.root.after(500, lambda: self.checkDeletionStatus(xmpp_delete))
 

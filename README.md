@@ -52,7 +52,7 @@ $ python main.py
 ```
 
 ## Note
-Ensure that your .env file contains the following environment variables, appropriately configured with your XMPP server details:
+Ensure that your .env file is inside the src directory and contains the following environment variables, appropriately configured with your XMPP server details:
 - **SERVICE_URL**=ws://yourdomain.com:7070/ws/
 - **DOMAIN**=yourdomain.com
 - **RESOURCE**=example

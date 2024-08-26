@@ -10,7 +10,8 @@ A Python-based XMPP client that provides user authentication, contact management
 <p align="center" >
   <a href="#Files">Files</a> •
   <a href="#Features">Features</a> •
-  <a href="#how-to-use">How To Use</a> 
+  <a href="#how-to-use">How To Use</a> •
+  <a href="#note">How To Use</a>
 </p>
 
 ## Files
@@ -47,3 +48,10 @@ $ cd src
 
 # Run the project
 $ python main.py
+```
+
+## Note
+Ensure that your .env file contains the following environment variables, appropriately configured with your XMPP server details:
+- **SERVICE_URL**=ws://yourdomain.com:7070/ws/
+- **DOMAIN**=yourdomain.com
+- **RESOURCE**=example

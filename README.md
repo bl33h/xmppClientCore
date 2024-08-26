@@ -31,6 +31,7 @@ The project provides the following features:
 - **Contact Management**: Add, remove, and update contacts in your XMPP roster.
 - **Group Chat**: Create and join group chats on the XMPP server, allowing for real-time communication in rooms.
 - **Message Sending and Receiving**: Send and receive messages to/from individual contacts or group chats.
+- **Filex echange**: Send and receive files to/from direct messages, they will be saved in the files directory.
 - **Account Management**: Manage your XMPP account, including deleting your account from the server.
 - **Logging**: All critical actions and events are logged for auditing and debugging purposes.
 - **Graphical User Interface**: User-friendly interface built using Tkinter for ease of use.
